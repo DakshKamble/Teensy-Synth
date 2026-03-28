@@ -17,6 +17,7 @@ float modPhase = 0.0;
 void writeDac(uint16_t value);
 float getSineWave(float frequency);
 float getModulator(float frequency);
+float getSawtoothWave(float frequency);
 
 void setup() {
   pinMode(CS, OUTPUT);
@@ -31,10 +32,11 @@ void loop() {
 
   // 2. Map that -1 to 1 value to your 200 to 400 range
   // Middle is 300, spread is 100
-  float targetFreq = 300.0 + (modValue * 100.0);
+  float targetFreq = 200.0 + (modValue * 100.0);
 
   // 3. Feed that "Target Frequency" into your main sine wave function
-  float finalSignal = getSineWave(targetFreq);
+  //float finalSignal = getSineWave(targetFreq);
+  float finalSignal = getSawtoothWave(targetFreq);
 
   // 4. Send to DAC
   writeDac((finalSignal + 1.0) * 2047);
@@ -46,7 +48,17 @@ void loop() {
 
 
 
+float getSawtoothWave(float frequency) {
+  static float p = 0.0;
+  float phaseInc = (2.0 * PI * frequency) / 10000.0;
 
+  p += phaseInc;
+  if(p > 2.0 * PI) p -= 2.0 * PI;
+
+  float out = (p/PI) - 1.0;
+  return out;
+
+}
 
 float getSineWave(float frequency) {
   static float phase = 0.0;
